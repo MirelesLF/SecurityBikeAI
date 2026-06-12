@@ -1,0 +1,485 @@
+/*
+  Proyecto: SecurityBike AI - Estilos de la Interfaz
+
+  Integrantes:
+  - LUIS FERNANDO MIRELES RODRIGUEZ (23240002)
+  - JOSE RODOLFO LOPEZ TORRES (22240496)
+  - VICTOR MANUEL ORTEGA GOMEZ (23240031)
+
+  Carrera: Ingenieria en Sistemas Computacionales
+
+  Objetivo del programa:
+  Dar el diseno blanco y azul, limpio y moderno, a toda la pagina: pantalla de
+  login, paneles de alumno y admin, tarjetas, tablas, badges y modales.
+*/
+
+/* CONFIGURACION GENERAL */
+:root {
+    --azul: #2563eb;
+    --azul-oscuro: #1d4ed8;
+    --azul-claro: #eff6ff;
+    --verde: #16a34a;
+    --rojo: #dc2626;
+    --gris-texto: #475569;
+    --gris-borde: #e2e8f0;
+    --fondo: #f1f5f9;
+    --blanco: #ffffff;
+    --sombra: 0 4px 16px rgba(15, 23, 42, 0.08);
+    --radio: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: var(--fondo);
+    color: #0f172a;
+    line-height: 1.5;
+}
+
+.oculto { display: none !important; }
+
+/* Pantalla de carga inicial (mientras Firebase revisa la sesion) */
+.cargando-pantalla {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    color: #fff;
+}
+.cargando-pantalla .material-icons-outlined { font-size: 56px !important; }
+.cargando-pantalla p { font-size: 22px; font-weight: 700; }
+.cargando-pantalla small { opacity: 0.9; }
+
+.material-icons-outlined { font-size: 20px; vertical-align: middle; }
+
+/* BOTONES */
+.btn-azul, .btn-verde, .btn-claro {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+.btn-azul { background: var(--azul); color: #fff; width: 100%; }
+.btn-azul:hover { background: var(--azul-oscuro); }
+.btn-verde { background: var(--verde); color: #fff; }
+.btn-verde:hover { filter: brightness(0.95); }
+.btn-claro { background: var(--azul-claro); color: var(--azul); }
+.btn-claro:hover { background: #dbeafe; }
+.grande { width: 100%; padding: 14px; font-size: 15px; margin-top: 14px; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ====================== */
+/* PANTALLA DE AUTENTICACION */
+/* ====================== */
+.auth-pantalla {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+}
+.auth-tarjeta {
+    background: var(--blanco);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    padding: 32px;
+    width: 100%;
+    max-width: 460px;
+}
+.auth-marca { text-align: center; margin-bottom: 22px; }
+.auth-logo { font-size: 46px !important; color: var(--azul); }
+.auth-marca h1 { font-size: 26px; font-weight: 700; }
+.auth-marca h1 span { color: var(--azul); }
+.auth-marca p { color: var(--gris-texto); font-size: 14px; }
+
+.auth-tabs {
+    display: flex;
+    background: var(--fondo);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+.auth-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    cursor: pointer;
+    font-family: inherit;
+}
+.auth-tab.activo { background: var(--blanco); color: var(--azul); box-shadow: var(--sombra); }
+
+.auth-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    margin: 12px 0 5px;
+}
+.auth-form input, .auth-form select, .filtros input, .filtros select {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+}
+.auth-form input:focus, .auth-form select:focus {
+    outline: none;
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.auth-form .btn-azul { margin-top: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.auth-mensaje { margin-top: 14px; text-align: center; font-size: 14px; font-weight: 500; min-height: 20px; }
+.auth-mensaje.error { color: var(--rojo); }
+.auth-mensaje.ok { color: var(--verde); }
+
+/* Captura de camara en el registro */
+.camara-captura {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--fondo);
+    border: 2px dashed var(--gris-borde);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.camara-captura video, .camara-captura img { width: 100%; height: 100%; object-fit: cover; }
+.camara-vacia {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; color: var(--gris-texto); font-size: 13px;
+}
+.camara-vacia .material-icons-outlined { font-size: 38px !important; }
+.camara-botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.camara-botones .btn-claro { flex: 1; min-width: 120px; }
+.ayuda-captura { font-size: 12px; color: var(--gris-texto); margin: 4px 0 8px; line-height: 1.4; }
+.nota-demo {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #dcfce7; color: var(--verde);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 12px; border-radius: 20px; margin-bottom: 10px;
+}
+.nota-demo .material-icons-outlined { font-size: 16px !important; }
+
+/* Evidencia fotografica de entradas/salidas */
+.evidencia-thumb {
+    width: 56px; height: 42px; object-fit: cover;
+    border-radius: 6px; border: 1px solid var(--gris-borde);
+    cursor: pointer;
+}
+.evidencia-modal { width: 100%; border-radius: 12px; margin: 6px 0 12px; }
+.etiqueta.entrada { background: #dcfce7; color: var(--verde); }
+.etiqueta.salida { background: var(--azul-claro); color: var(--azul); }
+.etiqueta.denegado-mov { background: #fee2e2; color: var(--rojo); }
+.etiqueta.web { background: #f1f5f9; color: var(--gris-texto); }
+.contador-fotos { font-size: 13px; font-weight: 600; color: var(--azul); margin: 10px 0 6px; }
+.miniaturas { display: flex; flex-wrap: wrap; gap: 8px; }
+.miniaturas .mini-foto { position: relative; width: 56px; height: 56px; border-radius: 8px; overflow: hidden; border: 2px solid var(--gris-borde); }
+.miniaturas .mini-foto img { width: 100%; height: 100%; object-fit: cover; }
+.miniaturas .mini-foto span { position: absolute; top: 0; left: 0; background: var(--azul); color: #fff; font-size: 10px; padding: 1px 5px; border-bottom-right-radius: 6px; }
+
+/* ====================== */
+/* DASHBOARD                 */
+/* ====================== */
+.topbar {
+    background: var(--blanco);
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 14px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.topbar-marca { display: flex; align-items: center; gap: 12px; }
+.topbar-marca .material-icons-outlined { font-size: 32px !important; color: var(--azul); }
+.topbar-marca strong { display: block; font-size: 17px; }
+.topbar-marca small { color: var(--gris-texto); font-size: 13px; }
+.topbar-usuario { display: flex; align-items: center; gap: 16px; }
+.usuario-info { text-align: right; }
+.usuario-info #usuario-nombre { display: block; font-weight: 600; font-size: 14px; }
+.chip-rol {
+    display: inline-block;
+    background: var(--azul-claro);
+    color: var(--azul);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.contenido { max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+/* Badges de estado */
+.badges { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 30px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--sombra);
+}
+.badge .material-icons-outlined { font-size: 17px !important; color: var(--gris-texto); }
+.badge .punto { width: 10px; height: 10px; border-radius: 50%; background: var(--rojo); }
+.badge.activo .punto { background: var(--verde); box-shadow: 0 0 6px rgba(22, 163, 74, 0.6); }
+
+/* Tarjetas */
+.grid-principal { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start; }
+.columna { display: flex; flex-direction: column; gap: 20px; }
+.tarjeta {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    padding: 20px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+}
+.tarjeta-titulo {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; font-size: 15px; margin-bottom: 16px;
+}
+.tarjeta-titulo .material-icons-outlined { color: var(--azul); }
+
+/* Stream de la camara */
+.stream-caja {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.stream-caja img { width: 100%; height: 100%; object-fit: contain; }
+.stream-error {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; color: #cbd5e1; text-align: center; padding: 20px;
+}
+.stream-error .material-icons-outlined { font-size: 46px !important; color: #64748b; }
+
+.mini-mensaje { text-align: center; font-size: 13px; margin-top: 10px; min-height: 18px; font-weight: 500; }
+.mini-mensaje.ok { color: var(--verde); }
+.mini-mensaje.error { color: var(--rojo); }
+
+/* Listas de datos */
+.lista-datos { display: flex; flex-direction: column; gap: 10px; }
+.lista-datos .fila { display: flex; justify-content: space-between; border-bottom: 1px solid var(--fondo); padding-bottom: 8px; }
+.lista-datos .fila span:first-child { color: var(--gris-texto); font-size: 13px; }
+.lista-datos .fila span:last-child { font-weight: 600; font-size: 14px; }
+.dato-grande { font-size: 18px; font-weight: 700; color: var(--azul); text-align: center; padding: 10px; }
+
+/* Caja de rostro */
+.rostro-caja {
+    width: 150px; height: 150px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--fondo);
+    border: 2px solid var(--gris-borde);
+}
+.rostro-caja img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Tablas */
+.tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla th {
+    text-align: left;
+    color: var(--gris-texto);
+    font-weight: 600;
+    padding: 10px 12px;
+    border-bottom: 2px solid var(--gris-borde);
+    font-size: 12px;
+    text-transform: uppercase;
+}
+.tabla td { padding: 10px 12px; border-bottom: 1px solid var(--fondo); vertical-align: middle; }
+.tabla tr:hover td { background: var(--azul-claro); }
+.tabla img.foto-mini { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; }
+.tabla .btn-claro { padding: 6px 10px; font-size: 12px; }
+
+.etiqueta { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.etiqueta.permitido { background: #dcfce7; color: var(--verde); }
+.etiqueta.denegado { background: #fee2e2; color: var(--rojo); }
+.etiqueta.metodo { background: var(--azul-claro); color: var(--azul); }
+.etiqueta.si { background: #dcfce7; color: var(--verde); }
+.etiqueta.no { background: #f1f5f9; color: var(--gris-texto); }
+
+.filtros { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.filtros input { flex: 1; min-width: 160px; }
+.filtros select { width: auto; min-width: 150px; }
+.filtros .btn-claro { width: auto; }
+
+.acciones-celda { display: flex; gap: 6px; }
+.texto-vacio { text-align: center; color: var(--gris-texto); padding: 24px; font-size: 14px; }
+
+/* ====================== */
+/* MODALES                   */
+/* ====================== */
+.modal {
+    position: fixed; inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50; padding: 20px;
+}
+.modal-caja {
+    background: var(--blanco);
+    border-radius: 16px;
+    padding: 26px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+.modal-caja .btn-azul { margin-top: 18px; }
+.rfid-estado {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--azul-claro);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 0;
+    color: var(--azul);
+    font-weight: 600;
+}
+.rfid-estado.enlazada { background: #dcfce7; color: var(--verde); }
+.rfid-simular { display: flex; gap: 8px; margin-bottom: 8px; }
+.rfid-simular input { flex: 1; padding: 10px; border: 1px solid var(--gris-borde); border-radius: 8px; font-family: inherit; }
+.rfid-simular .btn-claro { width: auto; white-space: nowrap; }
+
+.girando { animation: girar 1.2s linear infinite; }
+@keyframes girar { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ====================== */
+/* MENU DE NAVEGACION        */
+/* ====================== */
+.menu {
+    display: flex;
+    gap: 6px;
+    background: var(--blanco);
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 0 26px;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 9;
+}
+.menu-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: var(--gris-texto);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+}
+.menu-item:hover { color: var(--azul); }
+.menu-item.activo { color: var(--azul); border-bottom-color: var(--azul); }
+.menu-item .material-icons-outlined { font-size: 18px !important; }
+
+/* ====================== */
+/* TARJETAS DE METRICAS      */
+/* ====================== */
+.metricas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.metrica {
+    background: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.metrica .material-icons-outlined { font-size: 34px !important; color: var(--azul); }
+.metrica strong { display: block; font-size: 24px; }
+.metrica small { color: var(--gris-texto); font-size: 12px; }
+
+/* ====================== */
+/* TOAST DE AVISOS           */
+/* ====================== */
+.toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 60;
+}
+.toast.ok { background: var(--verde); }
+.toast.error { background: var(--rojo); }
+
+/* ====================== */
+/* FORMULARIO EN MODAL       */
+/* ====================== */
+.form-modal { margin: 10px 0; }
+.form-modal label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gris-texto);
+    margin: 10px 0 5px;
+}
+.form-modal input, .form-modal select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--gris-borde);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+}
+.form-modal input:focus, .form-modal select:focus {
+    outline: none;
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ====================== */
+/* RESPONSIVO                */
+/* ====================== */
+@media (max-width: 860px) {
+    .grid-principal { grid-template-columns: 1fr; }
+    .metricas { grid-template-columns: 1fr 1fr; }
+    .topbar { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .menu { padding: 0 12px; }
+    .tabla { font-size: 12px; }
+    .contenido { padding: 16px; }
+}

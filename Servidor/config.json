@@ -1,0 +1,30 @@
+{
+  "url_camara": "http://192.168.137.207:4747/video",
+  "tipo_camara": "DroidCam",
+  "nombre_camara": "Camara IP del telefono",
+  "camara_opcional": true,
+  "ip_cerradura_udp": "192.168.1.20",
+  "puerto_udp": 5051,
+  "usar_udp_respaldo": true,
+  "mqtt_broker": "test.mosquitto.org",
+  "mqtt_port": 1883,
+  "mqtt_client_id": "securitybike_servidor",
+  "firebase_key_path": "tu_llave_firebase.json",
+  "carpeta_bd": "alumnos_db",
+  "modelo_deepface": "Facenet",
+  "detector_backend": "opencv",
+  "modo_demo_ia": true,
+  "resize_ia_ancho": 480,
+  "intervalo_ia_segundos": 0.7,
+  "frames_confirmacion": 1,
+  "umbral_reconocimiento": null,
+  "cooldown_apertura_segundos": 5,
+  "cooldown_denegado_ia_segundos": 10,
+  "mostrar_desconocidos": true,
+  "host": "0.0.0.0",
+  "puerto_servidor": 5000,
+  "debug": false,
+  "admin_emails": [
+    "admin@securitybike.local"
+  ]
+}

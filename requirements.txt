@@ -1,0 +1,16 @@
+# ======================
+# SecurityBike AI - Dependencias del Servidor (Python)
+# Instalar con: pip install -r requirements.txt
+# ======================
+
+flask
+flask-cors
+opencv-python
+numpy
+firebase-admin
+deepface
+paho-mqtt
+
+# tf-keras es necesario para que DeepFace funcione con versiones nuevas de TensorFlow.
+# Si DeepFace marca error de Keras al iniciar, este paquete lo soluciona.
+tf-keras

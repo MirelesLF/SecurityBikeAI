@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<!--
+  Proyecto: SecurityBike AI - Interfaz Web (Panel de Control)
+
+  Integrantes:
+  - LUIS FERNANDO MIRELES RODRIGUEZ (23240002)
+  - JOSE RODOLFO LOPEZ TORRES (22240496)
+  - VICTOR MANUEL ORTEGA GOMEZ (23240031)
+
+  Carrera: Ingenieria en Sistemas Computacionales
+
+  Objetivo del programa:
+  Pagina web del sistema. Permite iniciar sesion o registrarse (capturando el
+  rostro con la camara) y, segun el rol, muestra el panel del alumno o del
+  administrador con un menu de navegacion, los estados del sistema, la camara en
+  vivo, las tarjetas RFID, los alumnos y el historial de accesos.
+-->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurityBike AI - Control de Acceso</title>
+    <link rel="stylesheet" href="/css/estilos.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ====================== -->
+<!-- PANTALLA DE CARGA (mientras Firebase revisa la sesion) -->
+<!-- ====================== -->
+<div id="cargando" class="cargando-pantalla">
+    <span class="material-icons-outlined girando">pedal_bike</span>
+    <p>SecurityBike AI</p>
+    <small>Cargando...</small>
+</div>
+
+<!-- ====================== -->
+<!-- VISTA 1: AUTENTICACION   -->
+<!-- ====================== -->
+<section id="vista-auth" class="auth-pantalla oculto">
+    <div class="auth-tarjeta">
+        <div class="auth-marca">
+            <span class="material-icons-outlined auth-logo">pedal_bike</span>
+            <h1>SecurityBike <span>AI</span></h1>
+            <p>Sistema de Control de Acceso</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button id="tab-login" class="auth-tab activo" type="button">Iniciar sesion</button>
+            <button id="tab-registro" class="auth-tab" type="button">Crear cuenta</button>
+        </div>
+
+        <!-- Formulario de inicio de sesion -->
+        <form id="form-login" class="auth-form">
+            <label>Correo</label>
+            <input type="email" id="login-correo" placeholder="correo@ejemplo.com" required>
+            <label>Contrasena</label>
+            <input type="password" id="login-password" placeholder="Tu contrasena" required>
+            <button type="submit" class="btn-azul">
+                <span class="material-icons-outlined">login</span> Entrar
+            </button>
+        </form>
+
+        <!-- Formulario de registro de alumno -->
+        <form id="form-registro" class="auth-form oculto">
+            <div class="grid-2">
+                <div>
+                    <label>Nombre(s)</label>
+                    <input type="text" id="reg-nombres" placeholder="Luis Fernando">
+                </div>
+                <div>
+                    <label>Apellido(s)</label>
+                    <input type="text" id="reg-apellidos" placeholder="Mireles Rodriguez">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>Carrera</label>
+                    <input type="text" id="reg-carrera" placeholder="Ing. en Sistemas">
+                </div>
+                <div>
+                    <label>Semestre</label>
+                    <select id="reg-semestre">
+                        <option value="">Selecciona</option>
+                        <option>1</option><option>2</option><option>3</option><option>4</option>
+                        <option>5</option><option>6</option><option>7</option><option>8</option>
+                        <option>9</option><option>10</option><option>11</option><option>12</option>
+                    </select>
+                </div>
+            </div>
+            <label>Correo</label>
+            <input type="email" id="reg-correo" placeholder="correo@ejemplo.com">
+            <label>Contrasena</label>
+            <input type="password" id="reg-password" placeholder="Minimo 6 caracteres">
+
+            <label>Captura de rostro (3 a 5 fotos)</label>
+            <p class="ayuda-captura">
+                Para mejorar el reconocimiento, captura varias fotos: de frente,
+                ligeramente a la izquierda, a la derecha, con buena luz y sin moverte.
+            </p>
+            <div class="camara-captura">
+                <video id="video-registro" autoplay playsinline muted></video>
+                <canvas id="canvas-captura" class="oculto"></canvas>
+                <div class="camara-vacia" id="camara-vacia">
+                    <span class="material-icons-outlined">photo_camera</span>
+                    <span>Inicia la camara para tomar tus fotos</span>
+                </div>
+            </div>
+            <div class="camara-botones">
+                <button type="button" id="btn-iniciar-camara" class="btn-claro">
+                    <span class="material-icons-outlined">videocam</span> Iniciar camara
+                </button>
+                <button type="button" id="btn-capturar" class="btn-claro" disabled>
+                    <span class="material-icons-outlined">camera</span> Capturar foto
+                </button>
+                <button type="button" id="btn-quitar-foto" class="btn-claro" disabled>
+                    <span class="material-icons-outlined">undo</span> Quitar ultima
+                </button>
+            </div>
+            <div class="contador-fotos">Fotos capturadas: <span id="reg-contador">0</span>/5</div>
+            <div class="miniaturas" id="reg-miniaturas"></div>
+
+            <button type="submit" class="btn-azul">
+                <span class="material-icons-outlined">person_add</span> Crear cuenta
+            </button>
+        </form>
+
+        <p id="auth-mensaje" class="auth-mensaje"></p>
+    </div>
+</section>
+
+
+<!-- ====================== -->
+<!-- VISTA 2: DASHBOARD        -->
+<!-- ====================== -->
+<section id="vista-dashboard" class="oculto">
+    <!-- Barra superior -->
+    <header class="topbar">
+        <div class="topbar-marca">
+            <span class="material-icons-outlined">pedal_bike</span>
+            <div>
+                <strong id="titulo-panel">Sistema de Control de Acceso</strong>
+                <small id="subtitulo-panel">Panel de control general</small>
+            </div>
+        </div>
+        <div class="topbar-usuario">
+            <div class="usuario-info">
+                <span id="usuario-nombre">Usuario</span>
+                <span id="usuario-rol" class="chip-rol">alumno</span>
+            </div>
+            <button id="btn-logout" class="btn-claro">
+                <span class="material-icons-outlined">logout</span> Salir
+            </button>
+        </div>
+    </header>
+
+    <!-- Menu de navegacion (se llena por JS segun el rol) -->
+    <nav id="menu" class="menu"></nav>
+
+    <main class="contenido">
+
+        <!-- Badges de estado del sistema (siempre visibles) -->
+        <div class="badges" id="badges">
+            <div class="badge" id="badge-flask">
+                <span class="punto"></span><span class="material-icons-outlined">dns</span> Servidor Flask
+            </div>
+            <div class="badge" id="badge-firebase">
+                <span class="punto"></span><span class="material-icons-outlined">local_fire_department</span> Firebase
+            </div>
+            <div class="badge" id="badge-mqtt">
+                <span class="punto"></span><span class="material-icons-outlined">sensors</span> MQTT
+            </div>
+            <div class="badge" id="badge-camara">
+                <span class="punto"></span><span class="material-icons-outlined">photo_camera</span> <span id="badge-camara-texto">Camara IP</span>
+            </div>
+            <div class="badge" id="badge-cerradura">
+                <span class="punto"></span><span class="material-icons-outlined">lock</span> Cerradura
+            </div>
+        </div>
+
+        <!-- ========== SECCION COMPARTIDA: CAMARA ========== -->
+        <div id="sec-camara" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">
+                    <span class="material-icons-outlined">videocam</span> Camara IP en vivo
+                </div>
+                <p id="nota-modo-ia" class="nota-demo oculto">
+                    <span class="material-icons-outlined">bolt</span> 
+                </p>
+                <div class="stream-caja">
+                    <img id="stream-camara" src="" alt="Camara IP"
+                         onerror="this.classList.add('oculto'); document.getElementById('stream-error').classList.remove('oculto');">
+                    <div id="stream-error" class="stream-error oculto">
+                        <span class="material-icons-outlined">videocam_off</span>
+                        <p>No se pudo abrir la camara IP.<br>Revisa que DroidCam este abierto, que el telefono y la laptop esten en la misma red Wi-Fi y que la URL sea correcta.</p>
+                    </div>
+                </div>
+                <button class="btn-verde grande js-abrir">
+                    <span class="material-icons-outlined">lock_open</span> Abrir cerradura
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== ALUMNO: INICIO ========== -->
+        <div id="sec-alumno-inicio" class="seccion oculto">
+            <div class="grid-principal">
+                <div class="tarjeta">
+                    <div class="tarjeta-titulo"><span class="material-icons-outlined">badge</span> Mis datos</div>
+                    <div id="inicio-datos" class="lista-datos"></div>
+                    <button class="btn-verde grande js-abrir">
+                        <span class="material-icons-outlined">lock_open</span> Abrir cerradura
+                    </button>
+                </div>
+                <div class="tarjeta">
+                    <div class="tarjeta-titulo"><span class="material-icons-outlined">nfc</span> Estado de mi tarjeta</div>
+                    <div id="inicio-rfid" class="dato-grande">Sin tarjeta enlazada</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ALUMNO: MI TARJETA RFID ========== -->
+        <div id="sec-alumno-rfid" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo"><span class="material-icons-outlined">nfc</span> Mi tarjeta RFID</div>
+                <div id="mi-rfid" class="dato-grande">Sin tarjeta enlazada</div>
+                <button id="btn-enlazar-mia" class="btn-azul">
+                    <span class="material-icons-outlined">add_card</span> Enlazar mi tarjeta
+                </button>
+                <div id="mi-rfid-estado" class="rfid-estado oculto">
+                    <span class="material-icons-outlined girando">sync</span>
+                    <span id="mi-rfid-texto">Acerque la tarjeta al lector RFID...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ALUMNO: MI HISTORIAL ========== -->
+        <div id="sec-alumno-historial" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo"><span class="material-icons-outlined">history</span> Mi historial de checadas</div>
+                <table class="tabla">
+                    <thead><tr><th>Fecha/Hora</th><th>Metodo</th><th>Estado</th><th>Detalle</th></tr></thead>
+                    <tbody id="tabla-mi-historial"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== ALUMNO: MI PERFIL ========== -->
+        <div id="sec-alumno-perfil" class="seccion oculto">
+            <div class="grid-principal">
+                <div class="tarjeta">
+                    <div class="tarjeta-titulo"><span class="material-icons-outlined">person</span> Datos del perfil</div>
+                    <div id="perfil-datos" class="lista-datos"></div>
+                </div>
+                <div class="tarjeta">
+                    <div class="tarjeta-titulo"><span class="material-icons-outlined">face</span> Mi rostro registrado</div>
+                    <div class="rostro-caja"><img id="mi-rostro" alt="Mi rostro"></div>
+                    <p id="mi-biometrico" class="mini-mensaje"></p>
+                    <button class="btn-azul" onclick="abrirModalRostro(usuarioActual.uid, 'append')">
+                        <span class="material-icons-outlined">add_a_photo</span> Agregar fotos biometricas
+                    </button>
+                    <button class="btn-claro" style="margin-top:8px;" onclick="abrirModalRostro(usuarioActual.uid, 'replace')">
+                        <span class="material-icons-outlined">cached</span> Reemplazar biometrico
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN: DASHBOARD ========== -->
+        <div id="sec-admin-dashboard" class="seccion oculto">
+            <div class="metricas">
+                <div class="metrica"><span class="material-icons-outlined">groups</span><div><strong id="m-alumnos">0</strong><small>Alumnos</small></div></div>
+                <div class="metrica"><span class="material-icons-outlined">nfc</span><div><strong id="m-tarjetas">0</strong><small>Tarjetas enlazadas</small></div></div>
+                <div class="metrica"><span class="material-icons-outlined">check_circle</span><div><strong id="m-permitidos">0</strong><small>Accesos permitidos</small></div></div>
+                <div class="metrica"><span class="material-icons-outlined">cancel</span><div><strong id="m-denegados">0</strong><small>Accesos denegados</small></div></div>
+            </div>
+            <div class="tarjeta">
+                <div class="tarjeta-titulo"><span class="material-icons-outlined">lock_open</span> Apertura rapida</div>
+                <p class="mini-mensaje">Abre la cerradura desde el panel del administrador.</p>
+                <button class="btn-verde grande js-abrir">
+                    <span class="material-icons-outlined">lock_open</span> Abrir cerradura
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN: ALUMNOS ========== -->
+        <div id="sec-admin-alumnos" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">
+                    <span class="material-icons-outlined">groups</span> Alumnos registrados en el sistema
+                </div>
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Foto</th><th>Nombre completo</th><th>Carrera</th><th>Semestre</th>
+                            <th>Correo</th><th>ID Tarjeta RFID</th><th>Biometrico</th><th>Estado</th><th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-alumnos"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN: HISTORIAL ========== -->
+        <div id="sec-admin-historial" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">
+                    <span class="material-icons-outlined">history</span> Historial de checadas
+                </div>
+                <div class="filtros">
+                    <input type="text" id="filtro-alumno" placeholder="Filtrar por alumno...">
+                    <select id="filtro-metodo">
+                        <option value="">Todos los metodos</option>
+                        <option value="RFID">RFID</option>
+                        <option value="RFID_ENLACE">RFID_ENLACE</option>
+                        <option value="IA_ROSTRO">IA_ROSTRO</option>
+                        <option value="WEB_ALUMNO">WEB_ALUMNO</option>
+                        <option value="WEB_ADMIN">WEB_ADMIN</option>
+                    </select>
+                    <select id="filtro-estado">
+                        <option value="">Todos los estados</option>
+                        <option value="PERMITIDO">PERMITIDO</option>
+                        <option value="DENEGADO">DENEGADO</option>
+                    </select>
+                    <button id="btn-refrescar" class="btn-claro">
+                        <span class="material-icons-outlined">refresh</span> Actualizar
+                    </button>
+                </div>
+                <table class="tabla">
+                    <thead><tr><th>Fecha/Hora</th><th>Alumno</th><th>Metodo</th><th>Estado</th><th>Detalle</th></tr></thead>
+                    <tbody id="tabla-historial"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN: RFID ========== -->
+        <div id="sec-admin-rfid" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo"><span class="material-icons-outlined">nfc</span> Enlace de tarjetas RFID</div>
+                <p class="mini-mensaje">Para enlazar una tarjeta, ve a la pestana <strong>Alumnos</strong> y usa el boton de tarjeta en la fila del alumno.</p>
+                <div class="lista-datos">
+                    <div class="fila"><span>Estado de escucha</span><span id="rfid-panel-estado">Inactivo</span></div>
+                    <div class="fila"><span>Enlazando a</span><span id="rfid-panel-destino">-</span></div>
+                    <div class="fila"><span>Ultima tarjeta detectada</span><span id="rfid-panel-ultima">-</span></div>
+                    <div class="fila"><span>Ultimo evento</span><span id="rfid-panel-evento">-</span></div>
+                </div>
+                <div class="rfid-simular">
+                    <input type="text" id="rfid-panel-simular" placeholder="Simular UID (ej. B6 C7 40 07)">
+                    <button id="btn-panel-simular" class="btn-claro">Simular tarjeta</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN: SISTEMA ========== -->
+        <div id="sec-admin-sistema" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo"><span class="material-icons-outlined">settings</span> Estado del sistema</div>
+                <div id="sistema-datos" class="lista-datos"></div>
+            </div>
+        </div>
+
+        <!-- ========== COMPARTIDA: ENTRADAS Y SALIDAS ========== -->
+        <div id="sec-entradas" class="seccion oculto">
+            <div class="tarjeta">
+                <div class="tarjeta-titulo">
+                    <span class="material-icons-outlined">swap_vert</span> Entradas y salidas
+                </div>
+                <div class="filtros">
+                    <select id="es-filtro-metodo">
+                        <option value="">Todos los metodos</option>
+                        <option value="RFID">RFID</option>
+                        <option value="IA_ROSTRO">IA_ROSTRO</option>
+                        <option value="WEB_ALUMNO">WEB_ALUMNO</option>
+                        <option value="WEB_ADMIN">WEB_ADMIN</option>
+                    </select>
+                    <select id="es-filtro-mov">
+                        <option value="">Todos los movimientos</option>
+                        <option value="ENTRADA">ENTRADA</option>
+                        <option value="SALIDA">SALIDA</option>
+                        <option value="INTENTO_DENEGADO">INTENTO_DENEGADO</option>
+                        <option value="WEB">WEB</option>
+                    </select>
+                    <button id="es-refrescar" class="btn-claro">
+                        <span class="material-icons-outlined">refresh</span> Actualizar
+                    </button>
+                </div>
+                <table class="tabla">
+                    <thead>
+                        <tr><th>Foto</th><th>Fecha/Hora</th><th>Persona</th><th>Metodo</th>
+                            <th>Movimiento</th><th>Estado</th><th>Detalle</th></tr>
+                    </thead>
+                    <tbody id="tabla-entradas"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</section>
+
+<!-- ====================== -->
+<!-- MODAL: FOTO DE EVIDENCIA  -->
+<!-- ====================== -->
+<div id="modal-foto" class="modal oculto">
+    <div class="modal-caja">
+        <div class="tarjeta-titulo"><span class="material-icons-outlined">image</span> Evidencia</div>
+        <img id="foto-grande" class="evidencia-modal" alt="Evidencia">
+        <button id="btn-cerrar-foto" class="btn-azul">Cerrar</button>
+    </div>
+</div>
+
+
+<!-- ====================== -->
+<!-- MODAL: ENLAZAR RFID (admin) -->
+<!-- ====================== -->
+<div id="modal-rfid" class="modal oculto">
+    <div class="modal-caja">
+        <div class="tarjeta-titulo"><span class="material-icons-outlined">nfc</span> Enlazar tarjeta RFID</div>
+        <p>Acerque la tarjeta RFID al lector para vincularla con:</p>
+        <p><strong id="rfid-alumno-nombre">-</strong></p>
+        <div id="rfid-estado-caja" class="rfid-estado">
+            <span class="material-icons-outlined girando">sync</span>
+            <span id="rfid-estado-texto">Acerque la tarjeta al lector RFID...</span>
+        </div>
+        <div class="rfid-simular">
+            <input type="text" id="rfid-simular-uid" placeholder="Simular UID (ej. B6 C7 40 07)">
+            <button id="btn-rfid-simular" class="btn-claro">Simular tarjeta</button>
+        </div>
+        <button id="btn-cerrar-rfid" class="btn-azul">Cerrar</button>
+    </div>
+</div>
+
+<!-- ====================== -->
+<!-- MODAL: DETALLE DE ALUMNO  -->
+<!-- ====================== -->
+<div id="modal-detalle" class="modal oculto">
+    <div class="modal-caja">
+        <div class="tarjeta-titulo"><span class="material-icons-outlined">person</span> Detalle del alumno</div>
+        <div class="rostro-caja"><img id="detalle-rostro" alt="Rostro del alumno"></div>
+        <p id="detalle-biometrico" class="mini-mensaje"></p>
+        <div id="detalle-datos" class="lista-datos"></div>
+        <button id="btn-detalle-rostro" class="btn-claro" style="margin-top:12px;">
+            <span class="material-icons-outlined">photo_camera</span> Actualizar rostro
+        </button>
+        <button id="btn-cerrar-detalle" class="btn-azul">Cerrar</button>
+    </div>
+</div>
+
+<!-- ====================== -->
+<!-- MODAL: ACTUALIZAR ROSTRO (alumno propio / admin) -->
+<!-- ====================== -->
+<div id="modal-rostro" class="modal oculto">
+    <div class="modal-caja">
+        <div class="tarjeta-titulo"><span class="material-icons-outlined">photo_camera</span> <span id="rostro-titulo">Actualizar rostro</span></div>
+        <p class="ayuda-captura">Captura de 3 a 5 fotos: de frente, ligeramente a la izquierda, a la derecha y con buena luz.</p>
+        <div class="camara-captura">
+            <video id="rostro-video" autoplay playsinline muted></video>
+            <canvas id="rostro-canvas" class="oculto"></canvas>
+            <div class="camara-vacia" id="rostro-vacia">
+                <span class="material-icons-outlined">photo_camera</span>
+                <span>Inicia la camara para tomar las fotos</span>
+            </div>
+        </div>
+        <div class="camara-botones">
+            <button type="button" id="rostro-btn-iniciar" class="btn-claro">
+                <span class="material-icons-outlined">videocam</span> Iniciar camara
+            </button>
+            <button type="button" id="rostro-btn-capturar" class="btn-claro" disabled>
+                <span class="material-icons-outlined">camera</span> Capturar foto
+            </button>
+            <button type="button" id="rostro-btn-quitar" class="btn-claro" disabled>
+                <span class="material-icons-outlined">undo</span> Quitar ultima
+            </button>
+        </div>
+        <div class="contador-fotos">Fotos: <span id="rostro-contador">0</span>/5</div>
+        <div class="miniaturas" id="rostro-miniaturas"></div>
+        <button id="rostro-btn-guardar" class="btn-azul" disabled>
+            <span class="material-icons-outlined">save</span> Guardar
+        </button>
+        <button id="rostro-btn-cerrar" class="btn-claro" style="margin-top:8px;">Cancelar</button>
+        <p id="rostro-msg" class="mini-mensaje"></p>
+    </div>
+</div>
+
+<!-- ====================== -->
+<!-- MODAL: EDITAR ALUMNO (solo admin) -->
+<!-- ====================== -->
+<div id="modal-editar" class="modal oculto">
+    <div class="modal-caja">
+        <div class="tarjeta-titulo"><span class="material-icons-outlined">edit</span> Editar alumno</div>
+        <div class="form-modal">
+            <label>Nombre(s)</label>
+            <input type="text" id="edit-nombres">
+            <label>Apellido(s)</label>
+            <input type="text" id="edit-apellidos">
+            <label>Carrera</label>
+            <input type="text" id="edit-carrera">
+            <label>Semestre</label>
+            <select id="edit-semestre">
+                <option>1</option><option>2</option><option>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option>
+                <option>9</option><option>10</option><option>11</option><option>12</option>
+            </select>
+            <label>Estado</label>
+            <select id="edit-activo">
+                <option value="true">Activo</option>
+                <option value="false">Inactivo</option>
+            </select>
+        </div>
+        <button id="edit-btn-guardar" class="btn-azul">Guardar cambios</button>
+        <button id="edit-btn-cerrar" class="btn-claro" style="margin-top:8px;">Cancelar</button>
+        <p id="edit-msg" class="mini-mensaje"></p>
+    </div>
+</div>
+
+<!-- Toast de avisos -->
+<div id="toast" class="toast oculto"></div>
+
+
+<!-- FIREBASE + LOGICA DE LA APP -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

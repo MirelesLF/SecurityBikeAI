@@ -1,0 +1,45 @@
+# ======================
+# SecurityBike AI - Archivos que NO se suben a GitHub
+# ======================
+
+# Llave real de Firebase Admin SDK (NUNCA subir)
+tu_llave_firebase.json
+Servidor/tu_llave_firebase.json
+*.json.bak
+
+# Variables de entorno
+.env
+
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# ZIP y respaldos
+*.zip
+Originales/
+Documentacion/
+
+# Rostros locales de alumnos (datos personales) y cache de DeepFace
+Servidor/alumnos_db/*
+!Servidor/alumnos_db/.gitkeep
+*.pkl
+
+# Fotos de evidencia de entradas/salidas (datos personales)
+evidencias/
+Servidor/evidencias/
+
+# Capturas de prueba
+Herramientas/prueba_camara.jpg
+
+# Archivos del sistema operativo / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
